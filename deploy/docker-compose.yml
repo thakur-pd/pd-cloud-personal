@@ -1,0 +1,35 @@
+# Optional docker-compose for running PD Cloud Personal in a container
+# (the systemd install is recommended for production on bare EC2)
+#
+#   cd pd-cloud-personal
+#   docker compose -f deploy/docker-compose.yml up -d --build
+
+version: "3.9"
+
+services:
+  pdcloud:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    container_name: pdcloud
+    restart: unless-stopped
+    environment:
+      PDCLOUD_SECRET_KEY: "change-me-please"
+      PDCLOUD_HOST: "0.0.0.0"
+      PDCLOUD_PORT: "8000"
+      PDCLOUD_COOKIE_SECURE: "false"
+      PDCLOUD_DATA_DIR: "/data"
+      PDCLOUD_APPS_DIR: "/data/apps"
+      PDCLOUD_BACKUPS_DIR: "/data/backups"
+      PDCLOUD_LOGS_DIR: "/logs"
+      PDCLOUD_DB_PATH: "/data/pdcloud.db"
+    volumes:
+      - pdcloud-data:/data
+      - pdcloud-logs:/logs
+      - /var/run/docker.sock:/var/run/docker.sock   # allow managing host docker
+    ports:
+      - "8000:8000"
+
+volumes:
+  pdcloud-data:
+  pdcloud-logs:

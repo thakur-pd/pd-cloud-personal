@@ -1,0 +1,35 @@
+[Unit]
+Description=PD Cloud Personal - Hosting Control Panel
+After=network.target docker.service
+Wants=docker.service
+
+[Service]
+Type=simple
+User=@APP_USER@
+Group=@APP_USER@
+WorkingDirectory=@APP_DIR@/backend
+EnvironmentFile=@ETC_DIR@/pdcloud.env
+ExecStart=@APP_DIR@/venv/bin/uvicorn app.main:app \
+  --host 127.0.0.1 --port @PORT@ \
+  --proxy-headers --forwarded-allow-ips=127.0.0.1 \
+  --no-server-header
+Restart=always
+RestartSec=5
+KillMode=mixed
+TimeoutStopSec=20
+
+# --- Hardening ---
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=/var/lib/pdcloud /var/log/pdcloud
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+LimitNOFILE=65535
+
+[Install]
+WantedBy=multi-user.target
